@@ -67,9 +67,17 @@ const goals = (state = [], action) => {
 const combineReducers = Redux.combineReducers({
     todos,
     goals
-
 })
 
+const checkAndDispatch = (store, action) =>{
+    if(action.type === ADD_TODO && action.todo.name.toLowerCase().includes('bitcoin')){
+      return alert ("Nope, that's a bad idea")
+    }
+    if(action.type === ADD_GOAL && action.goal.name.toLowerCase().includes('bitcoin')){
+      return alert ("Nope, that's a bad idea")
+    }
+    return store.dispatch(action)
+  }
 
 const store = Redux.createStore(combineReducers);
 
@@ -87,7 +95,7 @@ const addTodo = () => {
   input.value = "";
 
   name &&
-    store.dispatch(
+   checkAndDispatch(store,
       addTodoAction({
         name,
         complete: false,
@@ -100,7 +108,7 @@ const addGoal = () => {
   const name = input.value;
   input.value = "";
   name &&
-    store.dispatch(
+    checkAndDispatch(store,
       addGoalAction({
         name,
         id: generateId(),
