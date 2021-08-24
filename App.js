@@ -73,11 +73,20 @@ const goals = (state = [], action) => {
       return state;
   }
 };
+const loading = (state = true, action)=> {
+switch(action.type){
+    case RECEIVE_DATA: 
+    return false
+    default:
+      return state
+}
+}
 
 // combine reducers
 const combineReducers = Redux.combineReducers({
   todos,
   goals,
+  loading
 });
 
 
@@ -169,6 +178,7 @@ class Todos extends React.Component {
 }
 
 class Goals extends React.Component {
+  
     addItem = (e) => {
         e.preventDefault();
         const name = this.input.value;
@@ -196,7 +206,7 @@ class Goals extends React.Component {
           ref={(input) => (this.input = input)}
         />
         <button onClick={this.addItem}>Add Todo</button>
-       <List items = {goals} removeItem = {this.removeItem}/>
+        <List items = {goals} removeItem = {this.removeItem}/>
       </div>
     );
   }
@@ -206,7 +216,6 @@ class App extends React.Component {
     componentDidMount(){
         const {store}  = this.props;
         store.subscribe(()=> this.forceUpdate())
-
     Promise.all([
         API.fetchTodos(),
         API.fetchGoals()
@@ -216,7 +225,8 @@ class App extends React.Component {
     }
   render() {
     const {store}  = this.props;
-    const { goals, todos } = store.getState();
+    const { goals, todos, loading } = store.getState();
+   if(loading) return <h3>loading ...</h3>
     return (
       <div>
         <Todos todos = {todos} store = {store}/>
