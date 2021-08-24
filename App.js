@@ -5,6 +5,7 @@ const REMOVE_GOAL = "REMOVE_GOAL";
 const ADD_TODO = "ADD_TODO";
 const REMOVE_TODO = "REMOVE_TODO";
 const TOGGLE_TODO = "TOGGLE_TODO";
+const RECEIVE_DATA = 'RECEIVE_DATA'
 
 const generateId = () =>
   Math.random().toString(36).substring(2) + new Date().getTime().toString(36);
@@ -36,6 +37,11 @@ const removeGoalAction = (id) => ({
   id,
 });
 
+const getAllDataAction = (todos, goals) => ({
+    type: RECEIVE_DATA,
+    todos,
+    goals,
+})
 // reducers
 const todos = (state = [], action) => {
   switch (action.type) {
@@ -49,6 +55,8 @@ const todos = (state = [], action) => {
           ? todo
           : Object.assign({}, todo, { complete: !todo.complete })
       );
+      case RECEIVE_DATA: 
+      return action.todos
     default:
       return state;
   }
@@ -59,7 +67,9 @@ const goals = (state = [], action) => {
       return state.concat([action.goal]);
     case REMOVE_GOAL:
       return state.filter((goal) => goal.id !== action.id);
-    default:
+    case RECEIVE_DATA: 
+    return action.goals
+      default:
       return state;
   }
 };
@@ -196,20 +206,12 @@ class App extends React.Component {
     componentDidMount(){
         const {store}  = this.props;
         store.subscribe(()=> this.forceUpdate())
-        // Promise.all([API.fetchTodos, API.fetchGoals]).then(([todos, goals]) => {
-        //   console.log("Todos", todos);
-        //   console.log("Goals", goals);
-        // });
-    //    const todos = API.fetchTodos().then(data => data);
-    //    const goals = API.fetchGoals().then(data => data);
-    //    console.log('todos', todos);
-    //    console.log('goals', goals);
+
     Promise.all([
         API.fetchTodos(),
         API.fetchGoals()
       ]).then(([ todos, goals ]) => {
-        console.log('Todos', todos)
-        console.log('Goals', goals)
+          store.dispatch(getAllDataAction(todos, goals));
       })
     }
   render() {
