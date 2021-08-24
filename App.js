@@ -144,14 +144,14 @@ class Todos extends React.Component {
   addItem = (e) => {
     e.preventDefault();
     const name = this.input.value;
-    this.input.value = "";
-    name &&
-      this.props.store.dispatch(
-        addTodoAction({
-          name,
-          id: generateId(),
-        })
-      );
+    if(name.length > 0) { return API.saveTodo(name)
+      .then(
+        (todo) => {this.props.store.dispatch(addTodoAction(todo))
+        this.input.value = "";
+        }
+      )
+      .catch(() => alert("An error occured please try again"));
+    }
   };
 
   removeItem = (todo) => {
@@ -192,17 +192,21 @@ class Goals extends React.Component {
     addItem = (e) => {
         e.preventDefault();
         const name = this.input.value;
-        this.input.value = "";
-        name &&
-          this.props.store.dispatch(
-            addGoalAction({
-              name,
-              id: generateId(),
-            })
-          );
+        if(name.length > 0) { return API.saveGoal(name)
+            .then(
+              (goal) => {this.props.store.dispatch(addGoalAction(goal))
+              this.input.value = "";
+              }
+            )
+            .catch(() => alert("An error occured please try again"));
+          }
       };
       removeItem = (goal) => {
         this.props.store.dispatch(removeGoalAction(goal.id))
+        return API.deleteGoal(goal.id).catch(() => {
+           this.props.store.dispatch(addGoalAction(goal))
+          alert('An error occured')
+        });
       }
       
   render() {
