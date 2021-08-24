@@ -99,78 +99,6 @@ const store = Redux.createStore(
   Redux.applyMiddleware(checker, logger)
 );
 
-store.subscribe(() => {
-  const { goals, todos } = store.getState();
-  document.getElementById("goals").innerHTML = "";
-  document.getElementById("todos").innerHTML = "";
-  goals.forEach(addGoalToDom);
-  todos.forEach(addTodoToDom);
-});
-
-const addTodo = () => {
-  const input = document.getElementById("todo");
-  const name = input.value;
-  input.value = "";
-
-  name &&
-    store.dispatch(
-      addTodoAction({
-        name,
-        complete: false,
-        id: generateId(),
-      })
-    );
-};
-const addGoal = () => {
-  const input = document.getElementById("goal");
-  const name = input.value;
-  input.value = "";
-  name &&
-    store.dispatch(
-      addGoalAction({
-        name,
-        id: generateId(),
-      })
-    );
-};
-
-document.getElementById("todoBtn").addEventListener("click", addTodo);
-document.getElementById("goalBtn").addEventListener("click", addGoal);
-
-const createRemoveButton = (onClick) => {
-  const removeBtn = document.createElement("button");
-  removeBtn.innerHTML = "X";
-  removeBtn.addEventListener("click", onClick);
-  return removeBtn;
-};
-
-const addTodoToDom = (todo) => {
-  const node = document.createElement("li");
-  const text = document.createTextNode(todo.name);
-  const removeBtn = createRemoveButton(() =>
-    store.dispatch(removeTodoAction(todo.id))
-  );
-  node.appendChild(text);
-  node.appendChild(removeBtn);
-  node.style.textDecoration = todo.complete ? "line-through" : "none";
-  node.addEventListener("click", () =>
-    store.dispatch(toggleTodoAction(todo.id))
-  );
-
-  document.getElementById("todos").appendChild(node);
-};
-const addGoalToDom = (goal) => {
-  const node = document.createElement("li");
-  const text = document.createTextNode(goal.name);
-  const removeBtn = createRemoveButton(() =>
-    store.dispatch(removeGoalAction(goal.id))
-  );
-  node.appendChild(text);
-  node.appendChild(removeBtn);
-  document.getElementById("goals").appendChild(node);
-};
-
-
 
 
 const List = ({items, removeItem, toggleHandler}) => {
@@ -245,7 +173,7 @@ class Goals extends React.Component {
       const {goals}  = this.props;
     return (
         <div>
-        <h1>Goal Listt</h1>
+        <h1>Goal List</h1>
         <input
           type="text"
           placeholder="Add Goal"
