@@ -164,6 +164,11 @@ class Todos extends React.Component {
   }
   toggleHandler = (id) => {
     this.props.store.dispatch(toggleTodoAction(id))
+   return API.saveTodoToggle().catch(() => {
+      this.props.store.dispatch(toggleTodoAction(id))
+      alert('An error occured. Fail to toggle Item');
+    }
+    );
 }
   render() {
     const {todos}  = this.props;
@@ -219,6 +224,7 @@ class Goals extends React.Component {
 
 class App extends React.Component {
     componentDidMount(){
+    
         const {store}  = this.props;
         store.subscribe(()=> this.forceUpdate())
     Promise.all([
