@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>React-redux todos Goals</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/3.7.2/redux.min.js"></script>
+    <script src="https://unpkg.com/react@16.3.0-alpha.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.3.0-alpha.1/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
 </head>
 <body>
     <div>
@@ -20,8 +23,11 @@
         <button id = 'goalBtn' onclick="addGoal">Add Goal</button>
         <ul id = 'goals'></ul>
     </div>
+    <hr/>
+    <div id = 'app'></div>
 
 
-    <script src="\index.js"></script>
+    <script type="text/javascript" src="\index.js"></script>
+    <script type="text/babel" src="\App.js"></script>
 </body>
 </html>
