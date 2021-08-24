@@ -83,7 +83,16 @@ const checker = (store) => (next) => (action) => {
   return next(action);
 };
 
-const store = Redux.createStore(combineReducers, Redux.applyMiddleware(checker));
+const logger = (store)=>(next)=>(action)=>{
+console.group(action.type)
+console.log('The action', action)
+const result = next(action)
+console.log('The new state is', store.getState())
+console.groupEnd();
+return result
+}
+
+const store = Redux.createStore(combineReducers, Redux.applyMiddleware(checker, logger));
 
 store.subscribe(() => {
   const { goals, todos } = store.getState();
