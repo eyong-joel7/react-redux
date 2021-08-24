@@ -64,11 +64,14 @@ const goals = (state = [], action) => {
   }
 };
 
+// combine reducers
 const combineReducers = Redux.combineReducers({
   todos,
   goals,
 });
 
+
+// Middlewares
 const checker = (store) => (next) => (action) => {
   if (
     action.type === ADD_TODO &&
@@ -94,19 +97,21 @@ const logger = (store) => (next) => (action) => {
   return result;
 };
 
+// store
 const store = Redux.createStore(
   combineReducers,
   Redux.applyMiddleware(checker, logger)
 );
 
 
-
+// React UI
 const List = ({items, removeItem, toggleHandler}) => {
 
   return (
     <ul>
       {items.map((item) => (
         <li key={item.id}  onClick = {toggleHandler ? () => toggleHandler(item.id) : null}>
+            {/* onClick = {() => toggleHandler ? toggleHandler(item.id)} */}
           {" "}
           <span style = {{textDecorationLine: item.complete? 'line-through' : 'none'}}>{item.name}</span>
           <button onClick = {()=> removeItem(item.id)}>X</button>
@@ -152,6 +157,7 @@ class Todos extends React.Component {
     );
   }
 }
+
 class Goals extends React.Component {
     addItem = (e) => {
         e.preventDefault();
@@ -190,6 +196,21 @@ class App extends React.Component {
     componentDidMount(){
         const {store}  = this.props;
         store.subscribe(()=> this.forceUpdate())
+        // Promise.all([API.fetchTodos, API.fetchGoals]).then(([todos, goals]) => {
+        //   console.log("Todos", todos);
+        //   console.log("Goals", goals);
+        // });
+    //    const todos = API.fetchTodos().then(data => data);
+    //    const goals = API.fetchGoals().then(data => data);
+    //    console.log('todos', todos);
+    //    console.log('goals', goals);
+    Promise.all([
+        API.fetchTodos(),
+        API.fetchGoals()
+      ]).then(([ todos, goals ]) => {
+        console.log('Todos', todos)
+        console.log('Goals', goals)
+      })
     }
   render() {
     const {store}  = this.props;
