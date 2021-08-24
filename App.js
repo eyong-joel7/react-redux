@@ -133,7 +133,7 @@ const List = ({items, removeItem, toggleHandler}) => {
             {/* onClick = {() => toggleHandler ? toggleHandler(item.id)} */}
           {" "}
           <span style = {{textDecorationLine: item.complete? 'line-through' : 'none'}}>{item.name}</span>
-          <button onClick = {()=> removeItem(item.id)}>X</button>
+          <button onClick = {()=> removeItem(item)}>X</button>
         </li>
       ))}
     </ul>
@@ -154,8 +154,13 @@ class Todos extends React.Component {
       );
   };
 
-  removeItem = (id) => {
-    this.props.store.dispatch(removeTodoAction(id))
+  removeItem = (todo) => {
+    this.props.store.dispatch(removeTodoAction(todo.id))
+     return API.deleteTodo(todo.id).catch(() => {
+        this.props.store.dispatch(addTodoAction(todo))
+       alert('An error occured')
+     });
+    
   }
   toggleHandler = (id) => {
     this.props.store.dispatch(toggleTodoAction(id))
@@ -191,8 +196,8 @@ class Goals extends React.Component {
             })
           );
       };
-      removeItem = (id) => {
-        this.props.store.dispatch(removeGoalAction(id))
+      removeItem = (goal) => {
+        this.props.store.dispatch(removeGoalAction(goal.id))
       }
       
   render() {
