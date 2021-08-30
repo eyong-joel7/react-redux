@@ -42,6 +42,7 @@ const getAllDataAction = (todos, goals) => ({
     todos,
     goals,
 })
+
 const handleDeleteTodo = (todo) => {
   return (dispatch) => {
     dispatch(removeTodoAction(todo.id));
@@ -50,9 +51,64 @@ const handleDeleteTodo = (todo) => {
       alert('An error occured')
     });
   }
-
+}
+const handleDeleteGoal = (goal) => {
+  return (dispatch) => {
+    dispatch(removeGoalAction(goal.id));
+    return API.deleteGoal(goal.id).catch(() => {
+      dispatch(addGoalAction(goal))
+      alert('An error occured')
+    });
+  }
 }
 
+const handleAddGoal = (goal, cb) => {
+return (dispatch) => {
+  return API.saveGoal(goal)
+  .then(
+    (goal) => {dispatch(addGoalAction(goal))
+    cb();
+    }
+  )
+  .catch(() => alert("An error occured please try again"));
+
+}
+}
+const handleAddTodo = (todo, cb) => {
+return (dispatch) => {
+  return API.saveTodo(todo)
+  .then(
+    (todo) => {dispatch(addTodoAction(todo))
+    cb();
+    }
+  )
+  .catch(() => alert("An error occured please try again"));
+
+}
+}
+
+const handleToggleTodo = (id) => {
+  return (dispatch) => {
+    dispatch(toggleTodoAction(id));
+    return API.saveTodoToggle(id)
+    .catch(() => {
+     dispatch(toggleTodoAction(id))
+      alert('An error occured. Fail to toggle Item');
+    }
+    );
+  }
+}
+
+const handleInitialData = () =>{
+  return(dispatch) => {
+    Promise.all([
+      API.fetchTodos(),
+      API.fetchGoals()
+    ]).then(([ todos, goals ]) => {
+       dispatch(getAllDataAction(todos, goals));
+    })
+  }
+}
 // reducers
 const todos = (state = [], action) => {
   switch (action.type) {
@@ -156,29 +212,15 @@ class Todos extends React.Component {
   addItem = (e) => {
     e.preventDefault();
     const name = this.input.value;
-    if(name.length > 0) { return API.saveTodo(name)
-      .then(
-        (todo) => {this.props.store.dispatch(addTodoAction(todo))
-        this.input.value = "";
-        }
-      )
-      .catch(() => alert("An error occured please try again"));
-    }
+    if(name.length > 0) this.props.store.dispatch(handleAddTodo(name, () =>  this.input.value = ""))
   };
 
   removeItem = (todo) => {
     this.props.store.dispatch(handleDeleteTodo(todo));
-
-    
-    
   }
+
   toggleHandler = (id) => {
-    this.props.store.dispatch(toggleTodoAction(id))
-   return API.saveTodoToggle().catch(() => {
-      this.props.store.dispatch(toggleTodoAction(id))
-      alert('An error occured. Fail to toggle Item');
-    }
-    );
+    this.props.store.dispatch(handleToggleTodo(id))
 }
   render() {
     const {todos}  = this.props;
@@ -202,21 +244,12 @@ class Goals extends React.Component {
     addItem = (e) => {
         e.preventDefault();
         const name = this.input.value;
-        if(name.length > 0) { return API.saveGoal(name)
-            .then(
-              (goal) => {this.props.store.dispatch(addGoalAction(goal))
-              this.input.value = "";
-              }
-            )
-            .catch(() => alert("An error occured please try again"));
-          }
+        name.length > 0 && this.props.store.dispatch(handleAddGoal(name, () => this.input.value = ''));
       };
+
+
       removeItem = (goal) => {
-        this.props.store.dispatch(removeGoalAction(goal.id))
-        return API.deleteGoal(goal.id).catch(() => {
-           this.props.store.dispatch(addGoalAction(goal))
-          alert('An error occured')
-        });
+        this.props.store.dispatch(handleDeleteGoal(goal));
       }
       
   render() {
@@ -240,13 +273,9 @@ class App extends React.Component {
     componentDidMount(){
     
         const {store}  = this.props;
+        store.dispatch(handleInitialData());
         store.subscribe(()=> this.forceUpdate())
-    Promise.all([
-        API.fetchTodos(),
-        API.fetchGoals()
-      ]).then(([ todos, goals ]) => {
-          store.dispatch(getAllDataAction(todos, goals));
-      })
+  
     }
   render() {
     const {store}  = this.props;
