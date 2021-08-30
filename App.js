@@ -42,6 +42,17 @@ const getAllDataAction = (todos, goals) => ({
     todos,
     goals,
 })
+const handleDeleteTodo = (todo) => {
+  return (dispatch) => {
+    dispatch(removeTodoAction(todo.id));
+    return API.deleteTodo(todo.id).catch(() => {
+      dispatch(addTodoAction(todo))
+      alert('An error occured')
+    });
+  }
+
+}
+
 // reducers
 const todos = (state = [], action) => {
   switch (action.type) {
@@ -116,10 +127,11 @@ const logger = (store) => (next) => (action) => {
   return result;
 };
 
+
 // store
 const store = Redux.createStore(
   combineReducers,
-  Redux.applyMiddleware(checker, logger)
+  Redux.applyMiddleware(ReduxThunk.default, checker, logger)
 );
 
 
@@ -129,7 +141,7 @@ const List = ({items, removeItem, toggleHandler}) => {
   return (
     <ul>
       {items.map((item) => (
-        <li key={item.id}  onClick = {toggleHandler ? () => toggleHandler(item.id) : null}>
+        <li key={item.id}  onClick = { () => toggleHandler && toggleHandler(item.id) }>
             {/* onClick = {() => toggleHandler ? toggleHandler(item.id)} */}
           {" "}
           <span style = {{textDecorationLine: item.complete? 'line-through' : 'none'}}>{item.name}</span>
@@ -155,11 +167,9 @@ class Todos extends React.Component {
   };
 
   removeItem = (todo) => {
-    this.props.store.dispatch(removeTodoAction(todo.id))
-     return API.deleteTodo(todo.id).catch(() => {
-        this.props.store.dispatch(addTodoAction(todo))
-       alert('An error occured')
-     });
+    this.props.store.dispatch(handleDeleteTodo(todo));
+
+    
     
   }
   toggleHandler = (id) => {
