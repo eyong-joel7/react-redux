@@ -271,13 +271,11 @@ class Goals extends React.Component {
 
 class App extends React.Component {
     componentDidMount(){
-        const {dispatch, subscribe}  = this.props;
+        const {dispatch}  = this.props;
         dispatch(handleInitialData());
-        subscribe(()=> this.forceUpdate())
     }
   render() {
     const {loading}  = this.props;
-
    if(loading) return <h3>loading ...</h3>
     return (
       <div>
@@ -287,55 +285,59 @@ class App extends React.Component {
     );
   }
 }
-class ConnectedApp extends React.Component{
-  render(){
-    return (
-      <Context.Consumer>
-        {(store) => {
-          const { loading } = store.getState();
-          const {dispatch, subscribe} = store
-           return <App loading={loading} dispatch = {dispatch} subscribe = {subscribe}/>;
-        }}
-      </Context.Consumer>
-    );
-  }
-}
-class ConnectedGoal extends React.Component{
-  render(){
-    return (
-      <Context.Consumer>
-        {
-      store => {
-const {dispatch} = store;
-const {goals} = store.getState()
-return (
-  <Goals goals = {goals} dispatch = {dispatch}/>
-)
-        }
-        }
-      </Context.Consumer>
-    )
-  }
-}
-class ConnectedTodos extends React.Component{
-  render(){
-    return (
-      <Context.Consumer>
-        {
-      store => {
-const {dispatch} = store;
-const {todos} = store.getState()
-return (
-  <Todos todos = {todos} dispatch = {dispatch}/>
-)
-        }
-        }
-      </Context.Consumer>
-    )
-  }
-}
+
+
+const ConnectedApp = connect((state) => ({
+  loading: state.loading
+}))(App);
+
+
+
+const ConnectedGoal = connect((state) => ({
+  goals: state.goals
+}))(Goals);
+
+
+const ConnectedTodos = connect((state) => ({
+  todos: state.todos
+}))(Todos);
 
 const Context = React.createContext();
+
+function connect(mapStateToProps){
+  return (Component)=> {
+class Receiver extends React.Component{
+  componentDidMount(){
+    const {subscribe} = this.props.store
+    this.unsubscribe = subscribe(()=> {this.forceUpdate()})
+  }
+  componentWillUnMount(){
+this.unsubscribe();
+  }
+  render(){
+    const {dispatch, getState} = this.props.store;
+    const state = getState();
+    const stateNeeded = mapStateToProps(state)
+    return(
+    <Component {...stateNeeded} dispatch  = {dispatch}/>
+    )
+  }
+}
+    class ConnectedComponent extends React.Component{
+      render(){
+        return (
+          <Context.Consumer>
+            {
+              (store)=> <Receiver store = {store}/>
+            }
+          </Context.Consumer>
+        )
+      }
+    }
+    return ConnectedComponent
+
+  }
+}
 
 class Provider extends React.Component{
 
@@ -348,4 +350,9 @@ class Provider extends React.Component{
   }
 }
 
-ReactDOM.render( <Provider store = {store}><ConnectedApp/></Provider>, document.getElementById("app"));
+ReactDOM.render(
+  <Provider store={store}>
+    <ConnectedApp />
+  </Provider>,
+  document.getElementById("app")
+);
